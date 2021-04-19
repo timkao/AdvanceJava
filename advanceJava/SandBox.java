@@ -9,25 +9,42 @@ public class SandBox {
 		CompletableFuture<Integer> cf = CompletableFuture.supplyAsync(() -> longNetworkProcess(20));
 		cf.thenAccept(value -> System.out.println("the result is " + value));
 		// 如果执行异常:
-        cf.exceptionally((e) -> {
+		cf.exceptionally((e) -> {
             e.printStackTrace();
             return null;
         });
+		
+		CompletableFuture<Integer> cf2 = CompletableFuture.supplyAsync(() -> longNetworkProcess(20));
+		cf2 = cf2.thenApplyAsync(value -> anotherProcess(value));
+		cf2.thenAccept(result -> System.out.println("the second result is " + result));
+		
         // 主线程不要立刻结束，否则CompletableFuture默认使用的线程池会立刻关闭:
         try {
-			Thread.sleep(3000);
+			Thread.sleep(4000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		System.out.println("has all results");
+
 	}
 	
 	public static int longNetworkProcess(int value) {
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		return value * 10;
+	}
+	
+	public static int anotherProcess(int value) {
 		try {
 			Thread.sleep(2000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		return value * 10;
+		return value * 3;
+		
 	}
 
 }
